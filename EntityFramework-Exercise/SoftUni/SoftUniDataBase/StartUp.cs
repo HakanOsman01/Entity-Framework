@@ -26,7 +26,9 @@ namespace SoftUni
             string employeeProjects = GetEmployeesInPeriod(softUniContext);
             //Console.WriteLine(employeeProjects);
             string eployeeAdress = GetAddressesByTown(softUniContext);
-            Console.WriteLine(eployeeAdress);
+           // Console.WriteLine(eployeeAdress);
+            var employee147 = GetEmployee147(softUniContext);
+            Console.WriteLine(employee147);
 
 
 
@@ -188,5 +190,26 @@ namespace SoftUni
              } 
              return sb.ToString().TrimEnd();
         }
+         public static string GetEmployee147(SoftUniContext context)
+         {
+            StringBuilder sb=new StringBuilder();
+            var employeeWithProjects = context.Employees.Find(147);
+
+            var projects = context.EmployeesProjects
+                .Select(ep => new
+                {
+                    ep.EmployeeId,
+                    ProjectName = ep.Project.Name
+
+                }).Where(e => e.EmployeeId == 147)
+                .OrderBy(p=>p.ProjectName)
+                .ToList();
+              
+            sb.Append($"{employeeWithProjects.FirstName} " +
+                $"{employeeWithProjects.LastName} - {employeeWithProjects.JobTitle} " +
+                $"{string.Join(' ',projects.Select(p=>p.ProjectName))}");
+            return sb.ToString().TrimEnd();
+
+         }
     }
 }
