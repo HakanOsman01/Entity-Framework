@@ -13,27 +13,29 @@ namespace SoftUni
         {
            SoftUniContext softUniContext = new SoftUniContext();
             
-            string allEmpolyeesInfo = GetEmployeesFullInformation(softUniContext);
-            //Console.WriteLine(allEmpolyeesInfo);
+           // string allEmpolyeesInfo = GetEmployeesFullInformation(softUniContext);
+           // //Console.WriteLine(allEmpolyeesInfo);
            
-            string employeesWithSalaryOver50_000 = GetEmployeesWithSalaryOver50000(softUniContext);
-            //Console.WriteLine(employeesWithSalaryOver50_000);
-            string employeeFormDepartmentResearchAndDevelopment 
-                = GetEmployeesFromResearchAndDevelopment(softUniContext);
-            //Console.WriteLine(employeeFormDepartmentResearchAndDevelopment);
-            //string employeeAdress = AddNewAddressToEmployee(softUniContext);
-            //Console.WriteLine(employeeAdress);
-            string employeeProjects = GetEmployeesInPeriod(softUniContext);
-            //Console.WriteLine(employeeProjects);
-            string eployeeAdress = GetAddressesByTown(softUniContext);
-           // Console.WriteLine(eployeeAdress);
-            var employee147 = GetEmployee147(softUniContext);
-           // Console.WriteLine(employee147);
-            var employeeWithDepartments=GetDepartmentsWithMoreThan5Employees
-                (softUniContext);
-            //Console.WriteLine(employeeWithDepartments);
-            var empoyeeIncreaseSalary = IncreaseSalaries(softUniContext);
-            Console.WriteLine(empoyeeIncreaseSalary);
+           // string employeesWithSalaryOver50_000 = GetEmployeesWithSalaryOver50000(softUniContext);
+           // //Console.WriteLine(employeesWithSalaryOver50_000);
+           // string employeeFormDepartmentResearchAndDevelopment 
+           //     = GetEmployeesFromResearchAndDevelopment(softUniContext);
+           // //Console.WriteLine(employeeFormDepartmentResearchAndDevelopment);
+           // //string employeeAdress = AddNewAddressToEmployee(softUniContext);
+           // //Console.WriteLine(employeeAdress);
+           // string employeeProjects = GetEmployeesInPeriod(softUniContext);
+           // //Console.WriteLine(employeeProjects);
+           // string eployeeAdress = GetAddressesByTown(softUniContext);
+           //// Console.WriteLine(eployeeAdress);
+           // var employee147 = GetEmployee147(softUniContext);
+           //// Console.WriteLine(employee147);
+           // var employeeWithDepartments=GetDepartmentsWithMoreThan5Employees
+           //     (softUniContext);
+           // //Console.WriteLine(employeeWithDepartments);
+           // var empoyeeIncreaseSalary = IncreaseSalaries(softUniContext);
+           // // Console.WriteLine(empoyeeIncreaseSalary);
+            var employeeFirstNameStartsWithSa = GetEmployeesByFirstNameStartingWithSa(softUniContext);
+            Console.WriteLine(employeeFirstNameStartsWithSa);
 
 
 
@@ -273,6 +275,28 @@ namespace SoftUni
            return stringBuilder.ToString().TrimEnd();
            
 
+        }
+        public static string GetEmployeesByFirstNameStartingWithSa(SoftUniContext context)
+        {
+            StringBuilder sb = new StringBuilder();
+            var employees = context.Employees
+                         .AsNoTracking()
+                         .Where(e => EF.Functions.Like(e.FirstName.ToLower(), "sa%"))
+                         .OrderBy(e=>e.FirstName)
+                         .ThenBy(e=>e.LastName)
+                         .ToList();
+            foreach (var em in employees)
+            {
+                sb.AppendLine($"{em.FirstName} {em.LastName} - {em.JobTitle} - " +
+                    $"(${em.Salary:f2})");
+            }
+            return sb.ToString().TrimEnd();
+
+            
+               
+               
+                
+                
         }
     }
 }
