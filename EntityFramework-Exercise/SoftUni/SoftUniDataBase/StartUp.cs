@@ -31,7 +31,9 @@ namespace SoftUni
            // Console.WriteLine(employee147);
             var employeeWithDepartments=GetDepartmentsWithMoreThan5Employees
                 (softUniContext);
-            Console.WriteLine(employeeWithDepartments);
+            //Console.WriteLine(employeeWithDepartments);
+            var empoyeeIncreaseSalary = IncreaseSalaries(softUniContext);
+            Console.WriteLine(empoyeeIncreaseSalary);
 
 
 
@@ -249,6 +251,28 @@ namespace SoftUni
             }
             return stringBuilder.ToString().TrimEnd();
             
+        }
+        public static string IncreaseSalaries(SoftUniContext context)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            var employees = context.Employees
+             .Where(e => e.Department.Name == "Engineering" ||
+             e.Department.Name == "Tool Design" ||
+             e.Department.Name == "Marketing" ||
+             e.Department.Name == "Information Services")
+             .OrderBy(e=>e.FirstName).ThenBy(e=>e.LastName)
+             .ToList();
+            foreach (var em in employees)
+            {
+                em.Salary *= 1.12M;
+                stringBuilder.AppendLine($"{em.FirstName} {em.LastName} ${em.Salary:f2}");
+
+            }
+            context.SaveChanges();
+            
+           return stringBuilder.ToString().TrimEnd();
+           
+
         }
     }
 }
