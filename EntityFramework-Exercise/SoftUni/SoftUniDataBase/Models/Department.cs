@@ -1,4 +1,5 @@
-﻿namespace SoftUni.Models
+﻿
+namespace SoftUni.Models
 {
     public partial class Department
     {
