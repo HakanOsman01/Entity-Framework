@@ -26,16 +26,16 @@ namespace P02_FootballBetting.Data
             
            
         }
-        public DbSet<PlayerStatistic> PlayerStatistic { get; set; }
-        public DbSet<Game> Game { get; set; }
-        public DbSet<Color> Colors { get; set; }
-        public DbSet<Town>Towns { get; set; }
-        public DbSet<Player> Players { get; set; }
-        public DbSet<Bet> Bets { get; set; }
-        public DbSet<Country>Countries { get; set; }
-        public DbSet<Team>Teams { get; set; }
-        public DbSet<Position> Positions { get; set; }
-        public DbSet<User>Users { get; set; }
+        public DbSet<PlayerStatistic> PlayerStatistic { get; set; } = null!;
+        public DbSet<Game> Game { get; set; } = null!;
+        public DbSet<Color> Colors { get; set; } = null!;
+        public DbSet<Town> Towns { get; set; } = null!;
+        public DbSet<Player> Players { get; set; } = null!;
+        public DbSet<Bet> Bets { get; set; } = null!;   
+        public DbSet<Country> Countries { get; set; } = null!;
+        public DbSet<Team> Teams { get; set; } = null!;
+        public DbSet<Position> Positions { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
