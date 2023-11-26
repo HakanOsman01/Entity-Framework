@@ -3,8 +3,11 @@ namespace SoftUni
 {
     using Data;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
     using SoftUni.Models;
     using System;
+    using System.Collections;
+    using System.Linq.Expressions;
     using System.Text;
     
     public class StartUp
@@ -12,34 +15,23 @@ namespace SoftUni
         static void Main(string[] args)
         {
            SoftUniContext softUniContext = new SoftUniContext();
-            
-           // string allEmpolyeesInfo = GetEmployeesFullInformation(softUniContext);
-           // //Console.WriteLine(allEmpolyeesInfo);
-           
-           // string employeesWithSalaryOver50_000 = GetEmployeesWithSalaryOver50000(softUniContext);
-           // //Console.WriteLine(employeesWithSalaryOver50_000);
-           // string employeeFormDepartmentResearchAndDevelopment 
-           //     = GetEmployeesFromResearchAndDevelopment(softUniContext);
-           // //Console.WriteLine(employeeFormDepartmentResearchAndDevelopment);
-           // //string employeeAdress = AddNewAddressToEmployee(softUniContext);
-           // //Console.WriteLine(employeeAdress);
-           // string employeeProjects = GetEmployeesInPeriod(softUniContext);
-           // //Console.WriteLine(employeeProjects);
-           // string eployeeAdress = GetAddressesByTown(softUniContext);
-           //// Console.WriteLine(eployeeAdress);
-           // var employee147 = GetEmployee147(softUniContext);
-           //// Console.WriteLine(employee147);
-           // var employeeWithDepartments=GetDepartmentsWithMoreThan5Employees
-           //     (softUniContext);
-           // //Console.WriteLine(employeeWithDepartments);
-           // var empoyeeIncreaseSalary = IncreaseSalaries(softUniContext);
-           // // Console.WriteLine(empoyeeIncreaseSalary);
-           // var employeeFirstNameStartsWithSa = GetEmployeesByFirstNameStartingWithSa(softUniContext);
-           // Console.WriteLine(employeeFirstNameStartsWithSa);
-           //var projects=DeleteProjectById(softUniContext);
-           // Console.WriteLine(projects);
-           var deleteTown=RemoveTown(softUniContext);
-            Console.WriteLine(deleteTown);
+
+            var employees = softUniContext
+                 .Employees
+                 .GroupBy(e=>new
+                 {
+                     e.DepartmentId,
+                     e.Department.Name
+                     
+                 })
+                 .Select(gr => new
+                 {
+                     DepartmentName=gr.Key.Name,
+                     AvgSalary=gr.Average(e => e.Salary)
+                 }).ToList();
+                
+
+
 
 
 
