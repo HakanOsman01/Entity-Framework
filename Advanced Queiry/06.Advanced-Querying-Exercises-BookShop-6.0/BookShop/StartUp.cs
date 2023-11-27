@@ -16,7 +16,7 @@
             using var db = new BookShopContext();
             //DbInitializer.ResetDatabase(db);
             string input = Console.ReadLine();
-            string result = GetAuthorNamesEndingIn(db,input);
+            string result = GetBookTitlesContaining(db,input);
             Console.WriteLine(result);
         }
         public static string GetBooksByAgeRestriction
@@ -137,6 +137,18 @@
                 .ToArray();
             return string.Join(Environment.NewLine, authors.Select(a => a.FullName));
 
+        }
+        public static string GetBookTitlesContaining(BookShopContext context, string input)
+        {
+            var bookTitles = context.Books
+                .Where(b => EF.Functions.Like(b.Title.ToLower(), $"%{input.ToLower()}%"))
+                .Select(b => new
+                {
+                    TitleBook = b.Title
+                })
+                .OrderBy(b => b.TitleBook)
+                .ToArray();
+            return string.Join(Environment.NewLine, bookTitles.Select(b => b.TitleBook));
         }
     }
 }
