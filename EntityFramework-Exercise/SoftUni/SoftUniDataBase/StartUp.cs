@@ -2,6 +2,7 @@
 namespace SoftUni
 {
     using Data;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using SoftUni.Models;
@@ -16,21 +17,38 @@ namespace SoftUni
         {
            SoftUniContext softUniContext = new SoftUniContext();
 
-            var employees = softUniContext
-                 .Employees
-                 .GroupBy(e=>new
-                 {
-                     e.DepartmentId,
-                     e.Department.Name
-                     
-                 })
-                 .Select(gr => new
-                 {
-                     DepartmentName=gr.Key.Name,
-                     AvgSalary=gr.Average(e => e.Salary)
-                 }).ToList();
-                
+            //var query = @"SELECT * FROM Employees";
+            //string jobTitle = "Marketing Specialist";
+            //SqlParameter sqlParameter = new("@jobtitle", jobTitle);
+            //FormattableString formattableString = $"SELECT * FROM dbo.Employees WHERE JobTitle = {jobTitle}";
+            //var employeees= softUniContext
+            //    .Employees
+            //    .FromSqlInterpolated(formattableString)
+            //    .ToArray();
+            //foreach ( var employee in employeees )
+            //{
+            //    Console.WriteLine(employee.FirstName);
+            //} 
 
+
+           
+           
+
+            
+           
+
+
+
+        }
+        public void ChangeNameEmployee(Employee employee,string newName)
+        {
+            using (SoftUniContext softUniContext = new SoftUniContext())
+            {
+                var epmployee=softUniContext.Entry(employee);
+                epmployee.State=EntityState.Modified;
+                employee.FirstName= newName;
+                softUniContext.SaveChanges();
+            }
 
 
 
