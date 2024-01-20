@@ -15,7 +15,7 @@
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
             string endName=Console.ReadLine();
-            string result = GetAuthorNamesEndingIn(db,endName);
+            string result = GetBooksByAuthor(db,endName);
             Console.WriteLine(result);
 
 
@@ -149,6 +149,52 @@
             .OrderBy(a=>a.FullName)
             .ToList();
             return string.Join(Environment.NewLine, authots.Select(a => a.FullName));
+        }
+
+        public static string GetBookTitlesContaining(BookShopContext context, string input)
+        {
+            var books=context.Books
+              .Where(b=>b.Title.ToLower().Contains(input.ToLower()))
+              .Select(b=> new
+              {
+                  b.Title
+              })
+              .OrderBy(b=>b.Title)
+              .ToList();
+            return string.Join(Environment.NewLine, books.Select(b => b.Title));
+
+
+             
+        }
+        public static string GetBooksByAuthor(BookShopContext context, string input)
+        {
+            var booksWithAuthors = context.Books
+               .Include(b => b.Author)
+               .Where(a => a.Author.LastName.ToLower().StartsWith(input.ToLower()))
+               .Select(b => new
+               {
+                   b.BookId,
+                   AuthorName = b.Author.FirstName + ' ' + b.Author.LastName,
+                   Books=b.BookCategories.Select(b=> new
+                   {
+                      BookNames=b.Book.Title
+                   })
+                   .ToArray()
+
+
+               })
+               .OrderBy(b=>b.BookId)
+               .ToList();
+            StringBuilder sb=new StringBuilder();
+            foreach (var author in booksWithAuthors)
+            {
+                foreach (var item in author.Books)
+                {
+                    sb.AppendLine($"{item.BookNames} ({author.AuthorName})");
+                }
+            }
+            return sb.ToString().Trim();
+               
         }
     }
 }
