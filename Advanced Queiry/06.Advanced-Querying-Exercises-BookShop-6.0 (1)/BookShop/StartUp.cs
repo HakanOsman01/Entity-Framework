@@ -1,8 +1,10 @@
 ﻿namespace BookShop
 {
+    using BookShop.Models;
     using BookShop.Models.Enums;
     using Data;
     using Initializer;
+    using Microsoft.EntityFrameworkCore;
     using System.Text;
     using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -12,8 +14,8 @@
         {
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
-            int year=int.Parse(Console.ReadLine());
-            string result = GetBooksNotReleasedIn(db,year);
+            string categoryeis=Console.ReadLine();
+            string result = GetBooksByCategory(db,categoryeis);
             Console.WriteLine(result);
 
 
@@ -75,6 +77,7 @@
             }
             return stringBuilder.ToString().Trim();
         }
+        //Ex 5
         public static string GetBooksNotReleasedIn(BookShopContext context, int year)
         {
             var books = context.Books.Where(b => b.ReleaseDate.Value.Year != year)
@@ -86,6 +89,27 @@
                 .OrderBy(b=>b.BookId)
                 .ToList();
             return string.Join(Environment.NewLine, books.Select(b=>b.BookTitle));
+        }
+        public static string GetBooksByCategory(BookShopContext context, string input)
+        {
+            string[] categories = input.Split(' ',StringSplitOptions.RemoveEmptyEntries)
+                .Select(c => c.ToLower())
+                .ToArray();
+            var books = context.BooksCategories
+               .Include(b => b.Category)
+                .Include(b=>b.Book)
+
+               .Select(b=> new
+               {
+                   BookTitle=b.Book.Title,
+                   BookCategory=b.Book.BookCategories
+               })
+               .Where(bc=>bc.BookCategory.Any(bc=>categories.Contains
+               (bc.Category.Name.ToLower())))
+               .OrderBy(b=>b.BookTitle)
+               .ToList();
+          
+            return string.Join(Environment.NewLine,books.Select(b=>b.BookTitle));
         }
     }
 }
