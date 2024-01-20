@@ -14,8 +14,8 @@
         {
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
-            string date=Console.ReadLine();
-            string result = GetBooksReleasedBefore(db,date);
+            string endName=Console.ReadLine();
+            string result = GetAuthorNamesEndingIn(db,endName);
             Console.WriteLine(result);
 
 
@@ -78,6 +78,8 @@
             return stringBuilder.ToString().Trim();
         }
         //Ex 5
+
+        //Ex 6
         public static string GetBooksNotReleasedIn(BookShopContext context, int year)
         {
             var books = context.Books.Where(b => b.ReleaseDate.Value.Year != year)
@@ -90,6 +92,7 @@
                 .ToList();
             return string.Join(Environment.NewLine, books.Select(b=>b.BookTitle));
         }
+        //Ex 7
         public static string GetBooksByCategory(BookShopContext context, string input)
         {
             string[] categories = input.Split(' ',StringSplitOptions.RemoveEmptyEntries)
@@ -111,6 +114,8 @@
           
             return string.Join(Environment.NewLine,books.Select(b=>b.BookTitle));
         }
+
+        //Ex 8
         public static string GetBooksReleasedBefore(BookShopContext context, string date)
         {
             var parsedDate = DateTime.Parse(date);
@@ -131,6 +136,19 @@
             }
             return sb.ToString();
 
+        }
+        public static string GetAuthorNamesEndingIn(BookShopContext context, string input)
+        {
+            var authots=context.Authors
+                .Select(a=> new
+            {
+                   a.FirstName,
+                FullName=a.FirstName +' '+ a.LastName,
+            })
+            .Where(a=>a.FirstName.EndsWith(input))
+            .OrderBy(a=>a.FullName)
+            .ToList();
+            return string.Join(Environment.NewLine, authots.Select(a => a.FullName));
         }
     }
 }
