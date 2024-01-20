@@ -14,8 +14,8 @@
         {
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
-            string categoryeis=Console.ReadLine();
-            string result = GetBooksByCategory(db,categoryeis);
+            string date=Console.ReadLine();
+            string result = GetBooksReleasedBefore(db,date);
             Console.WriteLine(result);
 
 
@@ -110,6 +110,27 @@
                .ToList();
           
             return string.Join(Environment.NewLine,books.Select(b=>b.BookTitle));
+        }
+        public static string GetBooksReleasedBefore(BookShopContext context, string date)
+        {
+            var parsedDate = DateTime.Parse(date);
+            var books = context.Books.Where(b => b.ReleaseDate < parsedDate)
+                .Select(b => new
+                {
+                    BookTitle = b.Title,
+                    BookEditon = b.EditionType.ToString(),
+                    PriceBook = b.Price,
+                    b.ReleaseDate
+                })
+                .OrderByDescending(b => b.ReleaseDate)
+                .ToList();
+             StringBuilder sb = new StringBuilder();
+            foreach (var book in books)
+            {
+                sb.AppendLine($"{book.BookTitle} - {book.BookEditon} - ${book.PriceBook:f2}");
+            }
+            return sb.ToString();
+
         }
     }
 }
