@@ -1,56 +1,31 @@
 ﻿
 namespace SoftUni
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
+   
     using Data;
-    using Microsoft.Data.SqlClient;
+   
     using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
+    
     using SoftUni.Models;
     using SoftUni.Models.DTO;
-    using SoftUni.Models.DTO.MappingProfiels;
     using System;
-    using System.Collections;
-    using System.ComponentModel;
+  
     using System.Data;
-    using System.Linq.Expressions;
+  
     using System.Text;
-    
+
+    using Newtonsoft.Json;
+    using SoftUni.Template;
+
     public class StartUp
     {
         static void Main(string[] args)
         {
-           using SoftUniContext softUniContext = new SoftUniContext();
-            //var config = new MapperConfiguration(cnf =>
-            //{
-            //    cnf.CreateMap<Employee, PersonDto>()
-            //    .ForMember(dto => dto.AddressText
-            //    , opt => opt.MapFrom(src => src.Address.AddressText))
-            //    .ForMember(dto => dto.City,
-            //    opt => opt.MapFrom(src => src.Address.Town.Name));
-            //});
-            //var mapper = config.CreateMapper();
-            var config = new MapperConfiguration(cnf =>
-            {
-                cnf.AddProfile<SoftUniProfile>();
-            });
-            var mapper=config.CreateMapper();
-
-            var employees = softUniContext.Employees
-            .Where(e => e.EmployeeId <= 50)
-            .ProjectTo<PersonDto>(config)
-            .ToList();
-            var personDto = mapper.Map<PersonDto>(employees);
-
-
-
-
-            //foreach (var employee in employees)
-            //{
-            //    Console.WriteLine($"Name: {employee.FirstName} " +
-            //        $"{employee.LastName}, Address: {employee.AddressText} City: {employee.City}");
-            //}
+            using SoftUniContext softUniContext = new SoftUniContext();
+            string json =
+                @"{""firstName"": ""Stamo"",""lastName"": ""Petkov"",""grade"":4}";
+            var student = JsonConvert
+                .DeserializeAnonymousType(json, JsonTemplate.StudentTemplate);
             Console.ReadLine();
 
 
@@ -58,10 +33,8 @@ namespace SoftUni
 
 
 
-
-
-
         }
+
         public void ChangeNameEmployee(Employee employee,string newName)
         {
             using (SoftUniContext softUniContext = new SoftUniContext())
