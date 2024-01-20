@@ -14,7 +14,7 @@
         {
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
-            Console.WriteLine(CountBooks(db, 12));
+            Console.WriteLine(CountCopiesByAuthor(db));
 
 
         }
@@ -205,6 +205,38 @@
         {
             var books=context.Books.Where(b=>b.Title.Length>lengthCheck).ToList();
             return books.Count;
+        }
+
+        //Ex 13
+        public static string CountCopiesByAuthor(BookShopContext context)
+        {
+            var books = context.Books
+                .Include(b => b.Author)
+                .Select(b=> new
+                {
+                    b.AuthorId,
+                    AuthorFullName=b.Author.FirstName+' '+b.Author.LastName,
+                    BooksInfo=b.Copies
+                })
+                .GroupBy(gr=> new {gr.AuthorId,gr.AuthorFullName})
+                .Select(b=> new
+                {
+                    AuthorName=b.Key.AuthorFullName,
+                    TotalBookCopies=b.Sum(gr=>gr.BooksInfo)
+
+                })
+                .OrderByDescending(b=>b.TotalBookCopies)
+                .ToList();    
+               
+                
+
+            StringBuilder sb=new StringBuilder();
+            foreach (var item in books)
+            {
+                sb.AppendLine($"{item.AuthorName} " +
+                    $"- {item.TotalBookCopies}");
+            }
+            return sb.ToString().Trim();
         }
     }
 }
