@@ -325,6 +325,8 @@
             
 
         }
+
+        //Ex 17
         public static int RemoveBooks(BookShopContext context)
         {
             var books = context.Books.Where(b => b.Copies < 4200).ToArray();
