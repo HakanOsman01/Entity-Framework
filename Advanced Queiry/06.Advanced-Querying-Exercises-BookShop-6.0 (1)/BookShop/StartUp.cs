@@ -14,7 +14,7 @@
         {
             using var db = new BookShopContext();
             // DbInitializer.ResetDatabase(db);
-            Console.WriteLine(CountCopiesByAuthor(db));
+            Console.WriteLine(GetTotalProfitByCategory(db));
 
 
         }
@@ -237,6 +237,42 @@
                     $"- {item.TotalBookCopies}");
             }
             return sb.ToString().Trim();
+        }
+        //Ex 14
+        public static string GetTotalProfitByCategory(BookShopContext context)
+        {
+            var totalProfitByCategory = context.BooksCategories
+
+               .Select(b => new
+               {
+                   b.CategoryId,
+                   BookCategory = b.Category.Name,
+                   BookProfit =b.Book.Price*b.Book.Copies
+                 
+                  
+
+               }).GroupBy(gb => new
+               {
+                   gb.CategoryId,
+                   gb.BookCategory,
+
+               })
+               .Select(b => new
+               {
+                   b.Key.BookCategory,
+                   TotalProfit=b.Sum(gb=>gb.BookProfit)
+               })
+               .OrderByDescending(b=>b.TotalProfit)
+               .ThenBy(b=>b.BookCategory) 
+               .ToList();
+            StringBuilder sb=new StringBuilder();
+            foreach (var item in totalProfitByCategory)
+            {
+                sb.AppendLine($"{item.BookCategory} ${item.TotalProfit:f2}");
+            }
+            return sb.ToString().Trim();
+               
+               
         }
     }
 }
