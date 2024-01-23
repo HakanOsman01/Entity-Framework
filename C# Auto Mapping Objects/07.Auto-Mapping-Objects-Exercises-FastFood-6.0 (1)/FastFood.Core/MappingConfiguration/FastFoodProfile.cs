@@ -2,6 +2,7 @@
 {
     using AutoMapper;
     using FastFood.Core.ViewModels.Categories;
+    using FastFood.Core.ViewModels.Employees;
     using FastFood.Models;
     using ViewModels.Positions;
 
@@ -20,6 +21,10 @@
                 .ForMember(x=>x.Name,y=>y.MapFrom(s=>s.CategoryName));
             CreateMap<Category, CategoryAllViewModel>()
                 .ForMember(x => x.Name, y => y.MapFrom(s => s.Name));
+
+            CreateMap<Position, RegisterEmployeeViewModel>()
+                .ForMember(x => x.PositionId, y => y.MapFrom(s => s.Id));
+            CreateMap<RegisterEmployeeInputModel, Employee>();
 
              
 

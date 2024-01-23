@@ -2,8 +2,11 @@
 {
     using System;
     using AutoMapper;
+    using AutoMapper.QueryableExtensions;
     using Data;
+    using FastFood.Models;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using ViewModels.Employees;
 
     public class EmployeesController : Controller
@@ -17,20 +20,45 @@
             _mapper = mapper;
         }
 
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
-            throw new NotImplementedException();
+
+            var position = await _context.Positions
+                .ProjectTo<RegisterEmployeeViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+           return View(position);
         }
 
         [HttpPost]
-        public IActionResult Register(RegisterEmployeeInputModel model)
+        public async Task<IActionResult> Register(RegisterEmployeeInputModel model)
         {
-            throw new NotImplementedException();
+            if(!ModelState.IsValid)
+            {
+                RedirectToAction("Error", "Home");
+            }
+            var employee = _mapper.Map<Employee>(model);
+           await _context.Employees.AddAsync(employee);
+           await _context.SaveChangesAsync();
+            return RedirectToAction("All");
+
+
         }
 
-        public IActionResult All()
+        public async Task<IActionResult> All()
         {
-            throw new NotImplementedException();
+            var empoyees = await _context.Employees
+                .Select(e=> new EmployeesAllViewModel
+                {
+                    Name=e.Name,
+                    Age=e.Age,
+                    Address=e.Address,
+                    Position=e.Position.Name
+
+                })
+                .ToListAsync();
+
+
+            return View(empoyees);
         }
     }
 }

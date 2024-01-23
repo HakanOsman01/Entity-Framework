@@ -19,9 +19,10 @@
             _mapper = mapper;
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            throw new NotImplementedException();
+
+            return View();
         }
 
         [HttpPost]
