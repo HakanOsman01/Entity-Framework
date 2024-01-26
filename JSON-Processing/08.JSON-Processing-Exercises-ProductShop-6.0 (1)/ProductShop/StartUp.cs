@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using ProductShop.Data;
 using ProductShop.Models;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace ProductShop
             var context = new ProductShopContext();
             //string path = File.ReadAllText("../../../Datasets/categories-products.json");
             //Console.WriteLine(ImportCategoryProducts(context, path));
-            Console.WriteLine(GetProductsInRange(context));
+            Console.WriteLine(GetSoldProducts(context));
 
 
         }
@@ -80,6 +81,35 @@ namespace ProductShop
             string json=JsonConvert.SerializeObject(getProductsInRange,Formatting.Indented);
             return json;
 
+
+        }
+        public static string GetSoldProducts(ProductShopContext context)
+        {
+            var soldProducts=context.Users
+                .Include(p=>p.ProductsSold)
+                .Include(p=>p.ProductsBought)
+                .Where(p=>p.ProductsSold.Any(p=>p.BuyerId!=null))
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
+                .Select(p=> new
+                {
+                    firstName=p.FirstName,
+                    lastName=p.LastName,
+                    soldProduct=p.ProductsSold.Select(ps=> new
+                    {
+                        name=ps.Name,
+                        price=ps.Price,
+                        buyerFirstName=ps.Buyer.FirstName,
+                        buyerLastName=ps.Buyer.LastName
+                    })
+                    .ToArray()
+
+
+                })
+                
+                .ToArray();
+            var json = JsonConvert.SerializeObject(soldProducts, Formatting.Indented);
+            return json;
 
         }
     }
