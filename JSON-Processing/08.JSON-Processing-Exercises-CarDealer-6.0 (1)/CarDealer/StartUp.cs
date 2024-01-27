@@ -4,9 +4,12 @@ using CarDealer.Data;
 using CarDealer.DTOs.Export;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
@@ -20,7 +23,7 @@ namespace CarDealer
         {
 
             var context = new CarDealerContext();
-            string output = GetCarsWithTheirListOfParts(context);
+            string output = GetSalesWithAppliedDiscount(context);
             Console.WriteLine(output);
 
 
@@ -213,6 +216,27 @@ namespace CarDealer
             string format=JsonConvert.SerializeObject (output,Formatting.Indented);
             return format;
 
+        }
+        public static string GetSalesWithAppliedDiscount(CarDealerContext context)
+        {
+            var cars = context.PartsCars.Select(ps => new
+            {
+                car = ps.Car,
+                customer = ps.Car.Sales.Select(c => new
+                {
+                    customerName = c.Customer.Name,
+                    discount = c.Discount,
+                    price = ps.Part.Price,
+                    priceWithDiscount = ps.Part.Price * (100 - c.Discount)
+
+
+                })
+                .ToArray()
+
+            }).ToArray();
+
+            string json = JsonConvert.SerializeObject(cars, Formatting.Indented);
+            return json;
         }
 
 
