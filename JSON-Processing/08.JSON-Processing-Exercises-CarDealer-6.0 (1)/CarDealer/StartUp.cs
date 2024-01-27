@@ -19,7 +19,8 @@ namespace CarDealer
         {
 
             var context = new CarDealerContext();
-            Console.WriteLine(GetOrderedCustomers(context));
+            string output = GetCarsFromMakeToyota(context);
+            Console.WriteLine(output);
 
 
 
@@ -158,6 +159,21 @@ namespace CarDealer
 
             return jsonFormat;
 
+        }
+        public static string GetCarsFromMakeToyota(CarDealerContext context)
+        {
+            var config = new MapperConfiguration(cfg 
+                => cfg.AddProfile<CarDealerProfile>());
+            var mapper=config.CreateMapper();
+            var carsMakeByToyotaDtos=context.Cars
+              .Where(c=>c.Make=="Toyota")
+              .ProjectTo<ExportToyotaCarsDto>(mapper.ConfigurationProvider)
+              .OrderBy(c=>c.Make)
+              .ThenByDescending(c=>c.TraveledDistance)
+              .ToArray();
+            string jsonFormat = 
+                JsonConvert.SerializeObject(carsMakeByToyotaDtos,Formatting.Indented);
+            return jsonFormat;
         }
 
 
