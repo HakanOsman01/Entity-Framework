@@ -1,8 +1,15 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using CarDealer.Data;
+using CarDealer.DTOs.Export;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace CarDealer
 {
@@ -10,9 +17,12 @@ namespace CarDealer
     {
         public static void Main()
         {
-            var context=new CarDealerContext();
-            string path = File.ReadAllText("../../../Datasets/sales.json");
-            Console.WriteLine(ImportSales(context,path));
+
+            var context = new CarDealerContext();
+            Console.WriteLine(GetOrderedCustomers(context));
+
+
+
         }
         public static string ImportSuppliers(CarDealerContext context, string inputJson)
         {
@@ -46,13 +56,45 @@ namespace CarDealer
         }
         public static string ImportCars(CarDealerContext context, string inputJson)
         {
-            var config=new MapperConfiguration(cng=>cng.AddProfile<CarDealerProfile>());
-            var mapper=new Mapper(config);
-            CarDto[] carDtos = JsonConvert.DeserializeObject<CarDto[]>(inputJson);
-            Car[] cars = mapper.Map<Car[]>(carDtos);
+          
+            var carsDto = JsonConvert.DeserializeObject<CarDto[]>(inputJson);
+
+            var cars = new List<Car>();
+            var carParts = new List<PartCar>();
+
+
+            foreach (var carDto in carsDto)
+            {
+
+                var car = new Car
+                {
+                    Make = carDto.Make,
+                    Model = carDto.Model,
+                   TraveledDistance= carDto.TraveledDistance,
+                  
+                   
+                };
+
+                foreach (var part in carDto.PartsId.Distinct())
+                {
+                    var carPart = new PartCar()
+                    {
+                        PartId = part,
+                        Car = car
+                    };
+
+                    carParts.Add(carPart);
+                }
+
+            }
+
             context.Cars.AddRange(cars);
+
+            context.PartsCars.AddRange(carParts);
+
             context.SaveChanges();
-            return $"Successfully imported {cars.Length}.";
+
+            return $"Successfully imported {context.Cars.Count()}.";
         }
         public static string ImportCustomers(CarDealerContext context, string inputJson)
         {
@@ -75,5 +117,49 @@ namespace CarDealer
             return $"Successfully imported {sales.Length}.";
 
         }
+        public static string GetOrderedCustomers(CarDealerContext context)
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<CarDealerProfile>();
+            });
+            var mapper=new Mapper(config);
+
+            var orderCustomersDto = context.Customers
+                //.Select(s => new
+                //{
+                //    Name=s.Name,
+                //    BirthDate=s.BirthDate,
+                //    IsYoungDriver=s.IsYoungDriver
+
+                //})
+                .ProjectTo<ExportOrderDto>(mapper.ConfigurationProvider)
+                .OrderBy(o=>o.BirthDate)
+                .ToArray();
+            for (int i = 0; i < orderCustomersDto.Length-1; i++)
+            {
+                if (orderCustomersDto[i].BirthDate==orderCustomersDto[i + 1].BirthDate)
+                {
+                    if (orderCustomersDto[i].IsYoungDriver==true 
+                        && orderCustomersDto[i].IsYoungDriver == false)
+                    {
+                        var swap = orderCustomersDto[i];
+                        orderCustomersDto[i] = orderCustomersDto[i + 1];
+                        orderCustomersDto[i + 1] = swap;
+                    }
+                  
+
+                }
+            }
+            var jsonSettings = new JsonSerializerSettings();
+            jsonSettings.DateFormatString = "dd/MM/yyyy";
+            jsonSettings.Formatting = Formatting.Indented;
+            string jsonFormat=JsonConvert.SerializeObject(orderCustomersDto,jsonSettings);
+
+            return jsonFormat;
+
+        }
+
+
     }
 }
