@@ -7,6 +7,7 @@ using CarDealer.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
@@ -19,7 +20,7 @@ namespace CarDealer
         {
 
             var context = new CarDealerContext();
-            string output = GetCarsFromMakeToyota(context);
+            string output = GetCarsWithTheirListOfParts(context);
             Console.WriteLine(output);
 
 
@@ -174,6 +175,44 @@ namespace CarDealer
             string jsonFormat = 
                 JsonConvert.SerializeObject(carsMakeByToyotaDtos,Formatting.Indented);
             return jsonFormat;
+        }
+        public static string GetCarsWithTheirListOfParts(CarDealerContext context)
+        {
+            var cars = context.Cars
+                .Select(c=> new
+                {
+                    c.Make,
+                    c.Model,
+                    c.TraveledDistance,
+                    parts=c.PartsCars.Select(cp=> new
+                    {
+                        cp.Part.Name,
+                        cp.Part.Price
+                    })
+                    .ToArray()
+                })
+                .ToList();
+
+            var output = new
+            {
+                cars = cars.Select(c => new
+                {
+                    c.Make,
+                    c.Model,
+                    c.TraveledDistance,
+                    parts = cars.Select(p => p.parts.Select(p => new
+                    {
+                        Name = p.Name,
+                        Price = Math.Round(p.Price, 2, MidpointRounding.AwayFromZero)
+                    })
+                    .ToArray())
+                })
+                .ToArray()
+
+            };
+            string format=JsonConvert.SerializeObject (output,Formatting.Indented);
+            return format;
+
         }
 
 
