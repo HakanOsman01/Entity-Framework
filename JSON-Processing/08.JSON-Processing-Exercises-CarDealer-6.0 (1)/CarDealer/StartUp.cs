@@ -11,8 +11,8 @@ namespace CarDealer
         public static void Main()
         {
             var context=new CarDealerContext();
-            string path = File.ReadAllText("../../../Datasets/suppliers.json");
-            Console.WriteLine(ImportSuppliers(context,path));
+            string path = File.ReadAllText("../../../Datasets/parts.json");
+            Console.WriteLine(ImportParts(context,path));
         }
         public static string ImportSuppliers(CarDealerContext context, string inputJson)
         {
@@ -27,6 +27,22 @@ namespace CarDealer
             context.SaveChanges();
 
             return $"Successfully imported {suppliers.Length}.";
+        }
+        public static string ImportParts(CarDealerContext context, string inputJson)
+        {
+            var config=new MapperConfiguration
+                (cnf=>cnf.AddProfile<CarDealerProfile>());
+            var mapper=new Mapper(config);
+            PartDto[] partDtos = JsonConvert.DeserializeObject<PartDto[]>(inputJson);
+           
+            Part[] parts = mapper.Map<Part[]>(partDtos);
+            int[]validSuppliersIds=context.Suppliers.Select(x=>x.Id).ToArray();
+            Part[] validParts = parts
+                .Where(x => validSuppliersIds.Contains(x.SupplierId))
+                .ToArray();
+            context.Parts.AddRange(validParts);
+            context.SaveChanges();
+            return $"Successfully imported {parts.Length}.";
         }
     }
 }
