@@ -219,24 +219,31 @@ namespace CarDealer
         }
         public static string GetSalesWithAppliedDiscount(CarDealerContext context)
         {
-            var cars = context.PartsCars.Select(ps => new
-            {
-                car = ps.Car,
-                customer = ps.Car.Sales.Select(c => new
+            var config = new 
+                MapperConfiguration(cnf => cnf.AddProfile<CarDealerProfile>());
+            var mapper = new Mapper(config);
+            var sales = context.Sales
+                .Include(s => s.Car)
+                .ThenInclude(s => s.PartsCars)
+                .Select(s => new
                 {
-                    customerName = c.Customer.Name,
-                    discount = c.Discount,
-                    price = ps.Part.Price,
-                    priceWithDiscount = ps.Part.Price * (100 - c.Discount)
+                    car = mapper.Map<ExportCarDto>(s.Car),
+                    customerName = s.Customer.Name,
+                    discount = s.Discount,
+                    price = s.Car.PartsCars.Select(s=>s.Part.Price).Sum(),
+                    priceWithDiscount= Math.Round(s.Car.PartsCars.Select(s => s.Part.Price).Sum()
+                    *((100-s.Discount)/100),2,MidpointRounding.AwayFromZero)
 
 
                 })
-                .ToArray()
-
-            }).ToArray();
-
-            string json = JsonConvert.SerializeObject(cars, Formatting.Indented);
+                .Take(10)
+                .ToArray();
+            
+           
+            string json=JsonConvert.SerializeObject(sales,Formatting.Indented);
             return json;
+
+            
         }
 
 
