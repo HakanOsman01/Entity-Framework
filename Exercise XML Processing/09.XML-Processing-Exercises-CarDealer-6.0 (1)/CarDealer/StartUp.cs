@@ -11,8 +11,8 @@ namespace CarDealer
         public static void Main()
         {
             var context= new CarDealerContext();
-            string xml = File.ReadAllText("../../../Datasets/suppliers.xml");
-            Console.WriteLine(ImportSuppliers(context, xml));
+            string xml = File.ReadAllText("../../../Datasets/parts.xml");
+            Console.WriteLine(ImportParts(context, xml));
         }
         private static Mapper GetMapper()
         {
@@ -36,6 +36,25 @@ namespace CarDealer
 
             return $"Successfully imported {suppliers.Length}";
 
+
+        }
+
+        public static string ImportParts(CarDealerContext context, string inputXml)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(ImportPartsDto[])
+                , new XmlRootAttribute("Parts"));
+            using var reader=new StringReader(inputXml);
+            ImportPartsDto[]partsDtos= (ImportPartsDto[])xmlSerializer.Deserialize(reader);
+            var mapper=GetMapper();
+            var supliersIds=context.Suppliers
+                .Select(s=>s.Id)
+                .ToList();
+            Part[] parts = mapper.Map<Part[]>(partsDtos
+                .Where(p => supliersIds.Contains(p.SupplierId)));
+                
+            context.Parts.AddRange(parts);
+            context.SaveChanges();
+            return $"Successfully imported {parts.Length}";
 
         }
     }
