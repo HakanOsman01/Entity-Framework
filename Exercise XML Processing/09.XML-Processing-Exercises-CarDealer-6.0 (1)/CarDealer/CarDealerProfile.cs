@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using CarDealer.DTOs.Import;
+using CarDealer.Models;
+using System.Security.Cryptography;
 
 namespace CarDealer
 {
@@ -6,6 +9,7 @@ namespace CarDealer
     {
         public CarDealerProfile()
         {
+            CreateMap<ImportSuppliersDto, Supplier>();
 
         }
     }
