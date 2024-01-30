@@ -2,6 +2,7 @@
 using CarDealer.Data;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
+using System.Text;
 using System.Xml.Serialization;
 
 namespace CarDealer
@@ -11,8 +12,8 @@ namespace CarDealer
         public static void Main()
         {
             var context= new CarDealerContext();
-            string xml = File.ReadAllText("../../../Datasets/parts.xml");
-            Console.WriteLine(ImportParts(context, xml));
+            string xml = File.ReadAllText("../../../Datasets/cars.xml");
+            Console.WriteLine(ImportCars(context, xml));
         }
         private static Mapper GetMapper()
         {
@@ -55,6 +56,19 @@ namespace CarDealer
             context.Parts.AddRange(parts);
             context.SaveChanges();
             return $"Successfully imported {parts.Length}";
+
+        }
+        public static string ImportCars(CarDealerContext context, string inputXml)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(ImportCarDto[])
+              , new XmlRootAttribute("Cars"));
+            using var reader = new StringReader(inputXml);
+            var carsDto = (ImportCarDto[])xmlSerializer.Deserialize(reader);
+            var mapper = GetMapper();
+            Car[] cars = mapper.Map<Car[]>(carsDto);
+
+
+            return "";
 
         }
     }
