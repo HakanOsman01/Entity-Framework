@@ -2,19 +2,16 @@
 
 namespace CarDealer.DTOs.Export
 {
-    [XmlType("Car")]
-    public class ExportCarWithDistanceDto
+    [XmlType("car")]
+    public class ExportCarDto
     {
         [XmlAttribute("make")]
         public string Make { get; set; }
-        [XmlAttribute("Model")]
+        [XmlAttribute("model")]
         public string Model { get; set; }
-
         [XmlAttribute("traveled-distance")]
-        public long TraveledDistance { get; set; }
+        public  long TraveledDistance { get; set; }
         [XmlArray("parts")]
-        public ExportPartIdsDto[] ExportPartIdsDto { get; set; }
-
-
+        public ExportPartDto[] ExportPartIdsDto { get; set; }
     }
 }

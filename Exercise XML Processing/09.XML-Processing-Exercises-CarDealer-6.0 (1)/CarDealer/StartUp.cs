@@ -4,6 +4,7 @@ using CarDealer.Data;
 using CarDealer.DTOs.Export;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -14,7 +15,7 @@ namespace CarDealer
         public static void Main()
         {
             var context= new CarDealerContext();
-            Console.WriteLine(GetCarsFromMakeBmw(context));
+            Console.WriteLine(GetCarsWithTheirListOfParts(context));
         }
         private static Mapper GetMapper()
         {
@@ -181,5 +182,47 @@ namespace CarDealer
             return sb.ToString().TrimEnd();
 
         }
+
+       public static string GetCarsWithTheirListOfParts(CarDealerContext context)
+        {
+            var mapper=GetMapper();
+            XmlSerializer xmlSerializer = new XmlSerializer
+                (typeof(ExportCarDto[]),
+                new XmlRootAttribute("cars"));
+            var carsDto = context.Cars.Select(c => new ExportCarDto
+            {
+                Make=c.Make,
+                Model=c.Model,
+                TraveledDistance=c.TraveledDistance,
+                ExportPartIdsDto=c.PartsCars.Select(ps=> new ExportPartDto
+                {
+                    Name=ps.Part.Name,
+                    Price=ps.Part.Price,
+
+                })
+                .OrderByDescending(p=>p.Price)
+                .ToArray()
+                
+
+            })
+            .OrderByDescending(d=>d.TraveledDistance)
+            .ThenBy(c=>c.Model)
+            .Take(5)
+            .ToArray();
+           StringBuilder stringBuilder= new StringBuilder();
+            var xns=new XmlSerializerNamespaces();
+            xns.Add(string.Empty,string.Empty);
+           using(StringWriter sw=new StringWriter(stringBuilder))
+           {
+                xmlSerializer.Serialize(sw, carsDto,xns);
+           }
+         
+           return stringBuilder.ToString().TrimEnd();
+
+
+
+       }
+
+
     }
 }
