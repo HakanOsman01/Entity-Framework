@@ -10,6 +10,7 @@ namespace CarDealer.DTOs.Import
         public int Model { get; set; }
        
         public long TraveledDistance { get; set; }
+
         
     }
 }

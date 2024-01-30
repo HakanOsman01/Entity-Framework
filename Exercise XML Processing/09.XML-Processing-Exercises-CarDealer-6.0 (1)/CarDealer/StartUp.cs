@@ -65,10 +65,34 @@ namespace CarDealer
             using var reader = new StringReader(inputXml);
             var carsDto = (ImportCarDto[])xmlSerializer.Deserialize(reader);
             var mapper = GetMapper();
-            Car[] cars = mapper.Map<Car[]>(carsDto);
+            List<Car>cars=new List<Car>();
+            foreach (var carDto in carsDto)
+            {
+                Car car = mapper.Map<Car>(carDto);
+                var partsIds = carDto.Parts
+                    .Select(p=>p.Id)
+                    .Distinct()
+                    .ToArray();
+                var carParts = new List<PartCar>();
+                foreach (var partId in partsIds)
+                {
+                    carParts.Add(new PartCar
+                    {
+                        Car = car,
+                        PartId = partId
+
+                    });
+
+                }
+                car.PartsCars = carParts;
+                cars.Add(car);
 
 
-            return "";
+              
+            }
+            context.Cars.AddRange(cars);
+            context.SaveChanges();
+            return $"Successfully imported {cars.Count}";
 
         }
     }

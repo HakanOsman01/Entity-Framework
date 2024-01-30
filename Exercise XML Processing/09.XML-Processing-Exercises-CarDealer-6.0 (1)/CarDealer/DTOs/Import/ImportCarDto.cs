@@ -9,11 +9,11 @@ namespace CarDealer.DTOs.Import
         [XmlElement("make")]
         public string Make { get; set; }
         [XmlElement("model")]
-        public int Model { get; set; }
+        public string Model { get; set; }
         [XmlElement("traveledDistance")]
         public string TraveledDistance { get; set; }
         [XmlArray("parts")]
-        public ImportPartsIdsDto[]  Parts { get; set; }
+        public ImportPartIdDto[] Parts { get; set; }
 
     }
 }
