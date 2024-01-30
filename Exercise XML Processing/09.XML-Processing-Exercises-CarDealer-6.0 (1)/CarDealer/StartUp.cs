@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using CarDealer.Data;
+using CarDealer.DTOs.Export;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
 using System.Text;
@@ -12,8 +14,7 @@ namespace CarDealer
         public static void Main()
         {
             var context= new CarDealerContext();
-            string xml = File.ReadAllText("../../../Datasets/customers.xml");
-            Console.WriteLine(ImportCustomers(context, xml));
+            Console.WriteLine(GetCarsWithDistance(context));
         }
         private static Mapper GetMapper()
         {
@@ -110,6 +111,52 @@ namespace CarDealer
 
 
             return $"Successfully imported {customers.Length}";
+
+        }
+        public static string ImportSales(CarDealerContext context, string inputXml)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer
+                (typeof(ImportSalesDto[]), new XmlRootAttribute("Sales"));
+            using var reader = new StringReader(inputXml);
+            var salesDtos = (ImportSalesDto[])xmlSerializer.Deserialize(reader);
+            var mapper = GetMapper();
+            int[] cardIds = context.Cars.Select(c => c.Id).ToArray();
+            Sale[] sales = mapper.Map<Sale[]>(salesDtos
+                .Where(s=>cardIds.Contains(s.CarId)));
+            context.Sales.AddRange(sales);
+            context.SaveChanges();
+            return $"Successfully imported {sales.Length}";
+
+        }
+
+        public static string GetCarsWithDistance(CarDealerContext context)
+        {
+            var mapper=GetMapper();
+
+            var cars = context.Cars
+            .Where(c => c.TraveledDistance > 2000000)
+            .OrderBy(c => c.Make)
+            .ThenBy(c => c.Model)
+            .Take(10)
+            .ProjectTo<ExportCarWithDistanceDto>(mapper.ConfigurationProvider)
+            .ToArray();
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(ExportCarWithDistanceDto[]),
+                new XmlRootAttribute("cars"));
+
+            var xsn = new XmlSerializerNamespaces();
+            xsn.Add(string.Empty,string.Empty);
+
+            StringBuilder sb= new StringBuilder();
+            using(StringWriter writer=new StringWriter(sb))
+            {
+                xmlSerializer.Serialize(writer, cars,xsn);
+
+            }
+            return sb.ToString().TrimEnd();
+
+
+
+
 
         }
     }
