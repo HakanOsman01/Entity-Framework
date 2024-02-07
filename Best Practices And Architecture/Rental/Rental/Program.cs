@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
+using Rental.Core.Contracts;
+using Rental.Core.Services;
 using Rental.Infrustructer.DataBase;
+using Rental.Infrustructer.DataBase.Comman;
 
 namespace Rental
 {
@@ -12,8 +16,13 @@ namespace Rental
                 => options.UseSqlServer(builder.Configuration
                 .GetConnectionString("RentalContext")));
 
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IRepository,Repository>();
+            builder.Services.AddScoped<IProperyService, PropertService>();
+
+
 
             var app = builder.Build();
 

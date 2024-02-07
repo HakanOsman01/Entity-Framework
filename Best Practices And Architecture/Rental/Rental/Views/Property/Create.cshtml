@@ -1,0 +1,13 @@
+﻿@model Rental.Core.Models.PropertyModel
+
+@{
+
+    ViewBag.Title = "Имоти";
+}
+<h2>Нов имот</h2>
+<form asp-action="Create" asp-controller="Property" method="post">
+    @Html.EditorFor(m=>m.Location)
+    @Html.EditorFor(m=>m.Price)
+    @Html.EditorFor(m=>m.Location)
+    <input type="submit" value="Създай"/> 
+</form>
