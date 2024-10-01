@@ -12,14 +12,56 @@ namespace CarDealer
     {
         public static void Main()
         {
-
-            var context = new CarDealerContext();
-            string output = GetSalesWithAppliedDiscount(context);
-            Console.WriteLine(output);
-
-
-
+            int[]array=Console.ReadLine().Split()
+                .Select(int.Parse)
+                .ToArray();
+            var sorted = MergeSort(array);
+            Console.WriteLine(string.Join(' ',sorted));
+            // context = new CarDealerContext();
+            //string output = GetSalesWithAppliedDiscount(context);
+            // Console.WriteLine(output);
         }
+
+        private static int[] MergeSort(int[] array)
+        {
+            if (array.Length <= 1)
+            {
+                return array;
+            }
+            var left = array.Take(array.Length / 2).ToArray();
+            var right = array.Skip(array.Length / 2).ToArray();
+            return Merge(MergeSort(left), MergeSort(right));
+        }
+
+        private static int[] Merge(int[] left, int[] right)
+        {
+            var mergeArray = new int[left.Length+right.Length];
+            var leftInx = 0;
+            var rightInx = 0;
+            while(leftInx< left.Length && rightInx<right.Length)
+            {
+                if (left[leftInx] < right[rightInx])
+                {
+                    mergeArray[leftInx++] = left[leftInx];
+                }
+                else
+                {
+                    mergeArray[rightInx++] = right[rightInx];
+                }
+
+            }
+            for (int i = leftInx; i < left.Length; i++)
+            {
+                mergeArray[i] = left[i];
+            }
+            for(int i=rightInx; i < right.Length; i++)
+            {
+                mergeArray[i] = right[i];
+            }
+            return mergeArray;
+        }
+
+        
         public static string ImportSuppliers(CarDealerContext context, string inputJson)
         {
             var config = new MapperConfiguration(cnf 
